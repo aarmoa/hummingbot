@@ -6,6 +6,7 @@
 [subrepo]
 	remote = https://github.com/aarmoa/connector_sub_repo.git
 	branch = development
-	commit = 
+	commit = 274708351c5fad7f292182b973fefc42251c588c
 	method = merge
 	cmdver = 0.4.3
+	parent = 756ae62d0806deef730cefb2d361457b8a0537a7
