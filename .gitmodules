@@ -1,0 +1,3 @@
+[submodule "hummingbot/connector/exchange/crypto_com"]
+	path = hummingbot/connector/exchange/crypto_com
+	url = https://github.com/aarmoa/connector_submodule.git
