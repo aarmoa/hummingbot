@@ -106,6 +106,9 @@ jobs:
           branch: ${{ github.ref }}
       - name: Install library
         run: |
+          mkdir full_repo
+          echo ${GITHUB_HEAD_REF}
+          git clone --depth 1 --branch "epic/tests_build" https://github.com/aarmoa/hummingbot.git full_repo
           source /usr/share/miniconda/etc/profile.d/conda.sh
           conda activate hummingbot
-          python3 -m pip install https://github.com/aarmoa/hummingbot/raw/epic/tests_build/test_build/hummingbot-linux.whl
+          python3 -m pip install -f full_repo/test_build hummingbot
