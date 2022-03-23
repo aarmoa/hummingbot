@@ -33,11 +33,10 @@ from hummingbot.core.event.events import (
     MarketTransactionFailureEvent,
     OrderCancelledEvent,
     OrderFilledEvent,
-    OrderType,
     SellOrderCompletedEvent,
     SellOrderCreatedEvent,
-    TradeType,
 )
+from hummingbot.core.data_type.common import OrderType, TradeType
 from hummingbot.core.data_type.trade_fee import AddedToCostTradeFee
 from hummingbot.core.network_iterator import NetworkStatus
 from hummingbot.core.utils.async_utils import safe_ensure_future, safe_gather
@@ -501,11 +500,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                                     tracked_order.client_order_id,
                                                                     tracked_order.base_asset,
                                                                     tracked_order.quote_asset,
-                                                                    (tracked_order.fee_asset
-                                                                     or tracked_order.base_asset),
                                                                     tracked_order.executed_amount_base,
                                                                     tracked_order.executed_amount_quote,
-                                                                    tracked_order.fee_paid,
                                                                     order_type))
                     else:
                         self.logger().info(f"The market sell order {tracked_order.client_order_id} has completed "
@@ -515,11 +511,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                                      tracked_order.client_order_id,
                                                                      tracked_order.base_asset,
                                                                      tracked_order.quote_asset,
-                                                                     (tracked_order.fee_asset
-                                                                      or tracked_order.quote_asset),
                                                                      tracked_order.executed_amount_base,
                                                                      tracked_order.executed_amount_quote,
-                                                                     tracked_order.fee_paid,
                                                                      order_type))
                 else:
                     self.logger().info(f"The market order {tracked_order.client_order_id} has failed/been cancelled "
@@ -619,11 +612,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                                     tracked_order.client_order_id,
                                                                     tracked_order.base_asset,
                                                                     tracked_order.quote_asset,
-                                                                    (tracked_order.fee_asset
-                                                                     or tracked_order.base_asset),
                                                                     tracked_order.executed_amount_base,
                                                                     tracked_order.executed_amount_quote,
-                                                                    tracked_order.fee_paid,
                                                                     tracked_order.order_type))
                     else:
                         self.logger().info(f"The market sell order {tracked_order.client_order_id} has completed "
@@ -633,11 +623,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                                      tracked_order.client_order_id,
                                                                      tracked_order.base_asset,
                                                                      tracked_order.quote_asset,
-                                                                     (tracked_order.fee_asset
-                                                                      or tracked_order.quote_asset),
                                                                      tracked_order.executed_amount_base,
                                                                      tracked_order.executed_amount_quote,
-                                                                     tracked_order.fee_paid,
                                                                      tracked_order.order_type))
                     tracked_order.last_state = "filled"
                     self.c_stop_tracking_order(tracked_order.client_order_id)
@@ -714,7 +701,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                       trading_pair,
                                                       decimal_amount,
                                                       decimal_price,
-                                                      order_id))
+                                                      order_id,
+                                                      tracked_order.creation_timestamp))
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -778,7 +766,8 @@ cdef class CoinbaseProExchange(ExchangeBase):
                                                        trading_pair,
                                                        decimal_amount,
                                                        decimal_price,
-                                                       order_id))
+                                                       order_id,
+                                                       tracked_order.creation_timestamp))
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -995,6 +984,7 @@ cdef class CoinbaseProExchange(ExchangeBase):
             trade_type,
             price,
             amount,
+            creation_timestamp=self.current_timestamp
         )
 
     cdef c_stop_tracking_order(self, str order_id):
