@@ -89,6 +89,8 @@ jobs:
       - name: Add changes
         shell: bash
         run: |
+          source /usr/share/miniconda/etc/profile.d/conda.sh
+          conda activate hummingbot
           python3 setup.py bdist_wheel
           mv dist/*.whl test_build/
       - name: Commit files
