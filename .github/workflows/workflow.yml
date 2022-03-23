@@ -92,7 +92,7 @@ jobs:
           source /usr/share/miniconda/etc/profile.d/conda.sh
           conda activate hummingbot
           python3 setup.py bdist_wheel
-          mv dist/*.whl test_build/
+          mv dist/hummingbot*linux*.whl test_build/hummingbot-linux.whl
       - name: Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -108,4 +108,4 @@ jobs:
         run: |
           source /usr/share/miniconda/etc/profile.d/conda.sh
           conda activate hummingbot
-          python3 -m pip install --no-index -f https://github.com/aarmoa/hummingbot/tree/epic/tests_build/test_build hummingbot
+          python3 -m pip install https://github.com/aarmoa/hummingbot/raw/epic/tests_build/test_build/hummingbot-linux.whl
