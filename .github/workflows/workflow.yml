@@ -94,7 +94,7 @@ jobs:
       - name: Add changes
         shell: bash
         run: |
-          python3 setup.py bdis_wheel
+          python3 setup.py bdist_wheel
           mv dist/*.whl test_build/
       - name: Commit files
         run: |
