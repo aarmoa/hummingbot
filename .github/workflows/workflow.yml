@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
     
       # Use cache's hashFiles function to check for changes in core code
       - name: Check for code changes
@@ -78,14 +80,6 @@ jobs:
           source /usr/share/miniconda/etc/profile.d/conda.sh
           ./install
 
-      # Compile and run tests if code has changed
-      - name: Run Flake8
-        shell: bash
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
-        run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
-          conda activate hummingbot
-          pre-commit run --all-files 
       - name: Compile Hummingbot
         shell: bash
         if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
@@ -97,41 +91,18 @@ jobs:
           conda activate hummingbot
           conda env export
           ./compile
-      - name: Run stable tests and calculate coverage
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
+      - name: Add changes
         shell: bash
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
-          conda activate hummingbot
-          make test
-      - name: Check and report global coverage
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
-        shell: bash
+          date > test_build/date_file.txt
+      - name: Commit files
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
-          conda activate hummingbot
-          make report_coverage
-      - name: Validate coverage for the changes
-        if: github.event_name == 'pull_request' && (steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true')
-        shell: bash
-        run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
-          conda activate hummingbot
-          git fetch --all -q
-          git checkout -b $GITHUB_SHA
-          coverage xml
-          diff-cover --compare-branch=origin/$GITHUB_BASE_REF --fail-under=80 coverage.xml
-
-      # Notify results to discord
-      - uses: actions/setup-ruby@v1
-      - name: Send Webhook Notification
-        if: always()
-        env:
-          JOB_STATUS: ${{ job.status }}
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-          HOOK_OS_NAME: ${{ runner.os }}
-          WORKFLOW_NAME: ${{ github.workflow }}
-        run: |
-          git clone --depth 1 https://github.com/DiscordHooks/github-actions-discord-webhook.git webhook
-          bash webhook/send.sh $JOB_STATUS $WEBHOOK_URL
-        shell: bash
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add test_build/*
+          git commit -m "Updating date"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
