@@ -50,12 +50,10 @@ jobs:
 
       # Install python/conda to check if core code has changed
       - uses: actions/setup-python@v2
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
         with:
           python-version: 3.x
 
       - name: Install Miniconda and nose
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
         shell: bash
         run: |
           MINICONDA_FILENAME=Miniconda3-latest-Linux-x86_64.sh
@@ -66,7 +64,6 @@ jobs:
 
       # Install pre_commit if code has changed
       - name: Install pre_commit
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
         shell: bash
         run: |
           source /usr/share/miniconda/etc/profile.d/conda.sh
@@ -74,7 +71,6 @@ jobs:
         
       # Install hummingbot env if environment-linux.yml has changed
       - name: Install Hummingbot
-        if: steps.conda-dependencies.outputs.cache-hit != 'true'
         shell: bash -l {0}
         run: |
           source /usr/share/miniconda/etc/profile.d/conda.sh
@@ -82,7 +78,6 @@ jobs:
 
       - name: Compile Hummingbot
         shell: bash
-        if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
         env:
           WITHOUT_CYTHON_OPTIMIZATIONS: true
         run: |
