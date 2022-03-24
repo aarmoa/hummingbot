@@ -44,6 +44,7 @@ jobs:
         with:
           program-cache-hit: ${{steps.program-changes.outputs.cache-hit}}
           dependencies-cache-hit: ${{steps.conda-dependencies.outputs.cache-hit}}
+          miniconda-os-name: "MacOSX"
 
       # Build wheel file
       - name: Build library wheel

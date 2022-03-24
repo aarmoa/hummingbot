@@ -7,6 +7,10 @@ inputs:
    dependencies-cache-hit:
      required: true
      description: "Value of truth regarding the program cache being hit or not"
+   miniconda-os-name:
+     required: false
+     description: "Name of the OS to use in the Miniconda installation script to download (Linux or MacOSX)"
+     default: "Linux"
 runs:
   using: "composite"
   steps:
@@ -29,7 +33,7 @@ runs:
       if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
       shell: bash
       run: |
-        MINICONDA_FILENAME=Miniconda3-latest-Linux-x86_64.sh
+        MINICONDA_FILENAME=Miniconda3-latest-${{miniconda-os-name}}-x86_64.sh
         curl -o $MINICONDA_FILENAME "https://repo.continuum.io/miniconda/$MINICONDA_FILENAME"
         bash ${MINICONDA_FILENAME} -b -f -p $HOME/miniconda3
         source /usr/share/miniconda/etc/profile.d/conda.sh
