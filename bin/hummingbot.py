@@ -15,9 +15,9 @@ from hummingbot.client.config.config_helpers import (
     write_config_to_yml,
 )
 from hummingbot import (
-    init_logging,
+    chdir_to_data_directory,
     check_dev_mode,
-    chdir_to_data_directory
+    init_logging,
 )
 from hummingbot.client.ui import login_prompt
 from hummingbot.client.settings import AllConnectorSettings
