@@ -10,7 +10,7 @@ inputs:
    miniconda-os-name:
      required: false
      description: "Name of the OS to use in the Miniconda installation script to download (Linux or MacOSX)"
-     default: "Linux"
+     default: Linux
 runs:
   using: "composite"
   steps:
