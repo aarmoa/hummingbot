@@ -33,7 +33,9 @@ runs:
       if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
       shell: bash
       run: |
+        echo "${{miniconda-os-name}}"
         MINICONDA_FILENAME=Miniconda3-latest-${{miniconda-os-name}}-x86_64.sh
+        echo $MINICONDA_FILENAME
         curl -o $MINICONDA_FILENAME "https://repo.continuum.io/miniconda/$MINICONDA_FILENAME"
         bash ${MINICONDA_FILENAME} -b -f -p $HOME/miniconda3
         source /usr/share/miniconda/etc/profile.d/conda.sh
