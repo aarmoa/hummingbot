@@ -8,10 +8,7 @@ from typing import (
     List,
     Coroutine,
 )
-from weakref import (
-    ref,
-    ReferenceType,
-)
+from weakref import ref, ReferenceType
 
 from hummingbot.client.hummingbot_application import HummingbotApplication
 from hummingbot.client.config.global_config_map import global_config_map
