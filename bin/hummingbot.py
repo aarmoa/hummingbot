@@ -4,10 +4,7 @@ import path_util        # noqa: F401
 import asyncio
 import errno
 import socket
-from typing import (
-    List,
-    Coroutine,
-)
+from typing import Coroutine, List
 from weakref import ref, ReferenceType
 
 from hummingbot.client.hummingbot_application import HummingbotApplication
