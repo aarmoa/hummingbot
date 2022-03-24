@@ -1,0 +1,65 @@
+name: "Install environment and Hummingbot"
+description: "Installs conda environment, all libraries and compiles Hummingbot"
+inputs:
+   program-cache-hit:
+     required: true
+     description: "Value of truth regarding the program cache being hit or not"
+   dependencies-cache-hit:
+     required: true
+     description: "Value of truth regarding the program cache being hit or not"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Remove envs directory if exists to prevent bin/tar restore errors
+    - name: Remove envs directory
+      shell: bash
+      run: rm -Rf /usr/share/miniconda/envs
+
+    # Install python/conda to check if core code has changed
+    - uses: actions/setup-python@v2
+      if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
+      with:
+        python-version: 3.x
+
+    - name: Install Miniconda and nose
+      if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
+      shell: bash
+      run: |
+        MINICONDA_FILENAME=Miniconda3-latest-Linux-x86_64.sh
+        curl -o $MINICONDA_FILENAME "https://repo.continuum.io/miniconda/$MINICONDA_FILENAME"
+        bash ${MINICONDA_FILENAME} -b -f -p $HOME/miniconda3
+        source /usr/share/miniconda/etc/profile.d/conda.sh
+        conda install -c anaconda nose
+
+    # Install pre_commit if code has changed
+    - name: Install pre_commit
+      if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
+      shell: bash
+      run: |
+        source /usr/share/miniconda/etc/profile.d/conda.sh
+        conda install -c conda-forge pre_commit
+
+    # Install hummingbot env if environment-linux.yml has changed
+    - name: Install Hummingbot
+      if: ${{inputs.dependencies-cache-hit}} != 'true'
+      shell: bash -l {0}
+      run: |
+        source /usr/share/miniconda/etc/profile.d/conda.sh
+        ./install
+
+    # Compile and run tests if code has changed
+    - name: Compile Hummingbot
+      shell: bash
+      if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
+      env:
+        WITHOUT_CYTHON_OPTIMIZATIONS: 'true'
+      run: |
+        source /usr/share/miniconda/etc/profile.d/conda.sh
+        conda info --envs
+        conda activate hummingbot
+        conda env export
+        ./compile
