@@ -18,6 +18,7 @@ from hummingbot import (
     check_dev_mode,
     init_logging,
 )
+
 from hummingbot.client.ui import login_prompt
 from hummingbot.client.settings import AllConnectorSettings
 from hummingbot.core.event.events import HummingbotUIEvent

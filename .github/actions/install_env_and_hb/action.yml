@@ -38,9 +38,8 @@ runs:
         echo $MINICONDA_FILENAME
         echo $HOME
         echo $CONDA
+        echo $PATH
         curl -o $MINICONDA_FILENAME "https://repo.continuum.io/miniconda/$MINICONDA_FILENAME"
-        bash ${MINICONDA_FILENAME} -b -f -p $HOME/miniconda3
-        source /usr/share/miniconda/etc/profile.d/conda.sh
         conda install -c anaconda nose
 
     # Install pre_commit if code has changed
@@ -48,7 +47,6 @@ runs:
       if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
       shell: bash
       run: |
-        source /usr/share/miniconda/etc/profile.d/conda.sh
         conda install -c conda-forge pre_commit
 
     # Install hummingbot env if environment-linux.yml has changed
@@ -56,7 +54,6 @@ runs:
       if: ${{inputs.dependencies-cache-hit}} != 'true'
       shell: bash -l {0}
       run: |
-        source /usr/share/miniconda/etc/profile.d/conda.sh
         ./install
 
     # Compile and run tests if code has changed
@@ -66,7 +63,6 @@ runs:
       env:
         WITHOUT_CYTHON_OPTIMIZATIONS: 'true'
       run: |
-        source /usr/share/miniconda/etc/profile.d/conda.sh
         conda info --envs
         conda activate hummingbot
         conda env export
