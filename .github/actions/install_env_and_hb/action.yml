@@ -29,19 +29,6 @@ runs:
       with:
         python-version: 3.x
 
-    - name: Install Miniconda and nose
-      if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
-      shell: bash
-      run: |
-        echo "${{inputs.miniconda-os-name}}"
-        MINICONDA_FILENAME=Miniconda3-latest-${{inputs.miniconda-os-name}}-x86_64.sh
-        echo $MINICONDA_FILENAME
-        echo $HOME
-        echo $CONDA
-        echo $PATH
-        curl -o $MINICONDA_FILENAME "https://repo.continuum.io/miniconda/$MINICONDA_FILENAME"
-        conda install -c anaconda nose
-
     # Install pre_commit if code has changed
     - name: Install pre_commit
       if: ${{inputs.program-cache-hit}} != 'true' || ${{inputs.dependencies-cache-hit}} != 'true'
