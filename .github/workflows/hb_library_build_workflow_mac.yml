@@ -56,6 +56,7 @@ jobs:
           rm -f library/hummingbot*linux.whl
           python3 setup.py bdist_wheel
           mv dist/hummingbot*linux*.whl library/
+
       # Commit and push generated wheel file
       - name: Commit wheel file
         shell: bash
