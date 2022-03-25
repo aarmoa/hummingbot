@@ -50,7 +50,8 @@ runs:
       env:
         WITHOUT_CYTHON_OPTIMIZATIONS: 'true'
       run: |
-        $CONDA/bin/conda info --envs
-        $CONDA/bin/conda activate hummingbot
-        $CONDA/bin/conda env export
+        conda init bash
+        conda info --envs
+        conda activate hummingbot
+        conda env export
         ./compile
