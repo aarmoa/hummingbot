@@ -51,7 +51,7 @@ jobs:
         shell: bash
         if: steps.program-changes.outputs.cache-hit != 'true' || steps.conda-dependencies.outputs.cache-hit != 'true'
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
+          source $CONDA/etc/profile.d/conda.sh
           conda activate hummingbot
           rm -f library/hummingbot*linux.whl
           python3 setup.py bdist_wheel
