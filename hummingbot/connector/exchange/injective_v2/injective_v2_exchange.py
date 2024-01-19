@@ -822,24 +822,32 @@ class InjectiveV2Exchange(ExchangePyBase):
 
     def _process_balance_event(self, event: BalanceUpdateEvent):
         self._last_received_message_timestamp = self._time()
+        self.logger().debug(
+            f"\nUpdated last message timestamp when BALANCE event ({self._last_received_message_timestamp})")
         self._all_trading_events_queue.put_nowait(
             {"channel": "balance", "data": event}
         )
 
     def _process_user_order_update(self, order_update: OrderUpdate):
         self._last_received_message_timestamp = self._time()
+        self.logger().debug(
+            f"\nUpdated last message timestamp when ORDER UPDATE event ({self._last_received_message_timestamp})")
+
         self._all_trading_events_queue.put_nowait(
             {"channel": "order", "data": order_update}
         )
 
     def _process_user_trade_update(self, trade_update: TradeUpdate):
         self._last_received_message_timestamp = self._time()
+        self.logger().debug(
+            f"\nUpdated last message timestamp when TRADE UPDATE event ({self._last_received_message_timestamp})")
         self._all_trading_events_queue.put_nowait(
             {"channel": "trade", "data": trade_update}
         )
 
     def _process_transaction_event(self, transaction_event: Dict[str, Any]):
         self._last_received_message_timestamp = self._time()
+        self.logger().debug(f"\nUpdated last message timestamp when TRANSACTION event ({self._last_received_message_timestamp})")
         self._all_trading_events_queue.put_nowait(
             {"channel": "transaction", "data": transaction_event}
         )
@@ -935,4 +943,5 @@ class InjectiveV2Exchange(ExchangePyBase):
             if last_recv_diff > self.TICK_INTERVAL_LIMIT
             else self.LONG_POLL_INTERVAL
         )
+        self.logger().debug(f"\nPOLL INTERVAL: {poll_interval} (last received message timestamp {self._last_received_message_timestamp})")
         return poll_interval
