@@ -347,11 +347,9 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
     @property
     def expected_trading_rule(self):
         market = list(self.all_markets_mock_response.values())[0]
-        min_price_tick_size = (market.min_price_tick_size
-                               * Decimal(f"1e{market.base_token.decimals - market.quote_token.decimals}"))
-        min_quantity_tick_size = market.min_quantity_tick_size * Decimal(
-            f"1e{-market.base_token.decimals}")
-        min_notional = market.min_notional * Decimal(f"1e{-market.quote_token.decimals}")
+        min_price_tick_size = market.min_price_tick_size
+        min_quantity_tick_size = market.min_quantity_tick_size
+        min_notional = market.min_notional
         trading_rule = TradingRule(
             trading_pair=self.trading_pair,
             min_order_size=min_quantity_tick_size,
@@ -428,9 +426,9 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
             maker_fee_rate=Decimal("-0.0001"),
             taker_fee_rate=Decimal("0.001"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("0.000000000000001"),
-            min_quantity_tick_size=Decimal("1000000000000000"),
-            min_notional=Decimal("1000000"),
+            min_price_tick_size=Decimal("0.001"),
+            min_quantity_tick_size=Decimal("0.01"),
+            min_notional=Decimal("1"),
         )
 
         return {native_market.id: native_market}
@@ -689,14 +687,13 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals - self.base_decimals + 18}"))),
-                                "quantity": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
+                                "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id
                             },
                             "orderType": order.trade_type.name.lower(),
-                            "fillable": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
-                            "orderHash": base64.b64encode(
-                                bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
+                            "fillable": str(int(order.amount * Decimal("1e18"))),
+                            "orderHash": order.exchange_order_id,
                             "triggerPrice": "",
                         }
                     },
@@ -729,14 +726,13 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals - self.base_decimals + 18}"))),
-                                "quantity": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
+                                "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id,
                             },
                             "orderType": order.trade_type.name.lower(),
-                            "fillable": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
-                            "orderHash": base64.b64encode(
-                                bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
+                            "fillable": str(int(order.amount * Decimal("1e18"))),
+                            "orderHash": order.exchange_order_id,
                             "triggerPrice": "",
                         }
                     },
@@ -769,12 +765,12 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals - self.base_decimals + 18}"))),
-                                "quantity": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
+                                "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id,
                             },
                             "orderType": order.trade_type.name.lower(),
-                            "fillable": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
+                            "fillable": str(int(order.amount * Decimal("1e18"))),
                             "orderHash": base64.b64encode(
                                 bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
                             "triggerPrice": "",
@@ -800,11 +796,11 @@ class InjectiveV2ExchangeTests(AbstractExchangeConnectorTests.ExchangeConnectorT
                     "marketId": self.market_id,
                     "isBuy": order.trade_type == TradeType.BUY,
                     "executionType": "LimitMatchRestingOrder",
-                    "quantity": str(int(order.amount * Decimal(f"1e{self.base_decimals + 18}"))),
-                    "price": str(int(order.price * Decimal(f"1e{self.quote_decimals - self.base_decimals + 18}"))),
+                    "quantity": str(int(order.amount * Decimal("1e18"))),
+                    "price": str(int(order.price * Decimal("1e18"))),
                     "subaccountId": self.portfolio_account_subaccount_id,
                     "fee": str(int(
-                        self.expected_fill_fee.flat_fees[0].amount * Decimal(f"1e{self.quote_decimals + 18}")
+                        self.expected_fill_fee.flat_fees[0].amount * Decimal("1e18")
                     )),
                     "orderHash": base64.b64encode(bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
                     "feeRecipientAddress": self.portfolio_account_injective_address,

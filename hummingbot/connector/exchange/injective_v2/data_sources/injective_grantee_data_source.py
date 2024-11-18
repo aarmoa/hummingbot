@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional
 from google.protobuf import any_pb2
 from pyinjective import Transaction
 from pyinjective.async_client import AsyncClient
-from pyinjective.composer import Composer, injective_exchange_tx_pb
+from pyinjective.composer import Composer, injective_exchange_tx_v2_pb
 from pyinjective.core.network import Network
 from pyinjective.wallet import Address, PrivateKey
 
@@ -43,13 +43,9 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
             network: Network,
             rate_limits: List[RateLimit],
             fee_calculator_mode: "InjectiveFeeCalculatorMode",
-            use_secure_connection: bool = True,
     ):
         self._network = network
-        self._client = AsyncClient(
-            network=self._network,
-            insecure=not use_secure_connection,
-        )
+        self._client = AsyncClient(network=self._network)
         self._composer = None
         self._query_executor = PythonSDKInjectiveQueryExecutor(sdk_client=self._client)
         self._fee_calculator_mode = fee_calculator_mode
@@ -383,7 +379,7 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
             if order.order_type == OrderType.MARKET:
                 order_type = "BUY" if order.trade_type == TradeType.BUY else "SELL"
                 market_id = await self.market_id_for_spot_trading_pair(order.trading_pair)
-                creation_message = composer.msg_create_spot_market_order(
+                creation_message = composer.msg_create_spot_market_order_v2(
                     market_id=market_id,
                     sender=self.portfolio_account_injective_address,
                     subaccount_id=self.portfolio_account_subaccount_id,
@@ -403,7 +399,7 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
             if order.order_type == OrderType.MARKET:
                 order_type = "BUY" if order.trade_type == TradeType.BUY else "SELL"
                 market_id = await self.market_id_for_derivative_trading_pair(order.trading_pair)
-                creation_message = composer.msg_create_derivative_market_order(
+                creation_message = composer.msg_create_derivative_market_order_v2(
                     market_id=market_id,
                     sender=self.portfolio_account_injective_address,
                     subaccount_id=self.portfolio_account_subaccount_id,
@@ -426,12 +422,15 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
                 derivative_order_definitions.append(order_definition)
 
         if len(spot_order_definitions) > 0 or len(derivative_order_definitions) > 0:
-            message = composer.msg_batch_update_orders(
-                sender=self.portfolio_account_injective_address,
-                spot_orders_to_create=spot_order_definitions,
-                derivative_orders_to_create=derivative_order_definitions,
-            )
-            all_messages.append(message)
+            try:
+                message = composer.msg_batch_update_orders_v2(
+                    sender=self.portfolio_account_injective_address,
+                    spot_orders_to_create=spot_order_definitions,
+                    derivative_orders_to_create=derivative_order_definitions,
+                )
+                all_messages.append(message)
+            except Exception as e:
+                self.logger().error(f"Error creating batch update orders message: {e}")
 
         delegated_message = composer.MsgExec(
             grantee=self.trading_account_injective_address,
@@ -442,12 +441,12 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
 
     async def _order_cancel_message(
             self,
-            spot_orders_to_cancel: List[injective_exchange_tx_pb.OrderData],
-            derivative_orders_to_cancel: List[injective_exchange_tx_pb.OrderData]
+            spot_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData],
+            derivative_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData]
     ) -> any_pb2.Any:
         composer = await self.composer()
 
-        message = composer.msg_batch_update_orders(
+        message = composer.msg_batch_update_orders_v2(
             sender=self.portfolio_account_injective_address,
             spot_orders_to_cancel=spot_orders_to_cancel,
             derivative_orders_to_cancel=derivative_orders_to_cancel,
@@ -465,7 +464,7 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
     ) -> any_pb2.Any:
         composer = await self.composer()
 
-        message = composer.msg_batch_update_orders(
+        message = composer.msg_batch_update_orders_v2(
             sender=self.portfolio_account_injective_address,
             subaccount_id=self.portfolio_account_subaccount_id,
             spot_market_ids_to_cancel_all=spot_markets_ids,
@@ -477,17 +476,15 @@ class InjectiveGranteeDataSource(InjectiveDataSource):
         )
         return delegated_message
 
-    async def _generate_injective_order_data(self, order: GatewayInFlightOrder, market_id: str) -> injective_exchange_tx_pb.OrderData:
+    async def _generate_injective_order_data(self, order: GatewayInFlightOrder, market_id: str) -> injective_exchange_tx_v2_pb.OrderData:
         composer = await self.composer()
         order_hash = order.exchange_order_id
         cid = order.client_order_id if order_hash is None else None
-        order_data = composer.order_data(
+        order_data = composer.create_order_data_without_mask_v2(
             market_id=market_id,
             subaccount_id=self.portfolio_account_subaccount_id,
             order_hash=order_hash,
             cid=cid,
-            is_buy=order.trade_type == TradeType.BUY,
-            is_market_order=order.order_type == OrderType.MARKET,
         )
 
         return order_data

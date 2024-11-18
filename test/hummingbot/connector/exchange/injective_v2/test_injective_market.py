@@ -98,21 +98,19 @@ class InjectiveSpotMarketTests(TestCase):
 
     def test_min_price_tick_size(self):
         market = self._inj_usdt_market
-        expected_value = market.price_from_chain_format(chain_price=Decimal(market.native_market.min_price_tick_size))
+        expected_value = market.native_market.min_price_tick_size
 
         self.assertEqual(expected_value, market.min_price_tick_size())
 
     def test_min_quantity_tick_size(self):
         market = self._inj_usdt_market
-        expected_value = market.quantity_from_chain_format(
-            chain_quantity=Decimal(market.native_market.min_quantity_tick_size)
-        )
+        expected_value = market.native_market.min_quantity_tick_size
 
         self.assertEqual(expected_value, market.min_quantity_tick_size())
 
     def test_min_notional(self):
         market = self._inj_usdt_market
-        expected_value = market.native_market.min_notional / Decimal(f"1e{self._usdt_token.decimals}")
+        expected_value = market.native_market.min_notional
 
         self.assertEqual(expected_value, market.min_notional())
 
@@ -150,9 +148,9 @@ class InjectiveDerivativeMarketTests(TestCase):
             maker_fee_rate=Decimal("-0.0003"),
             taker_fee_rate=Decimal("0.003"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("100"),
+            min_price_tick_size=Decimal("0.001"),
             min_quantity_tick_size=Decimal("0.0001"),
-            min_notional=Decimal("1000000"),
+            min_notional=Decimal("1"),
         )
         self._inj_usdt_derivative_market = InjectiveDerivativeMarket(
             market_id="0x17ef48032cb24375ba7c2e39f384e56433bcab20cbee9a7357e4cba2eb00abe6",  # noqa: mock
@@ -194,7 +192,7 @@ class InjectiveDerivativeMarketTests(TestCase):
 
     def test_min_price_tick_size(self):
         market = self._inj_usdt_derivative_market
-        expected_value = market.price_from_chain_format(chain_price=market.native_market.min_price_tick_size)
+        expected_value = market.native_market.min_price_tick_size
 
         self.assertEqual(expected_value, market.min_price_tick_size())
 
@@ -215,7 +213,7 @@ class InjectiveDerivativeMarketTests(TestCase):
 
     def test_min_notional(self):
         market = self._inj_usdt_derivative_market
-        expected_value = market.native_market.min_notional / Decimal(f"1e{self._usdt_token.decimals}")
+        expected_value = market.native_market.min_notional
 
         self.assertEqual(expected_value, market.min_notional())
 

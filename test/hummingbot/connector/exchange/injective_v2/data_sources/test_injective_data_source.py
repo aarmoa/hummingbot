@@ -256,7 +256,6 @@ class InjectiveVaultsDataSourceTests(TestCase):
             vault_contract_address=self._vault_address,
             vault_subaccount_index=1,
             network=Network.testnet(node="sentry"),
-            use_secure_connection=True,
             rate_limits=CONSTANTS.PUBLIC_NODE_RATE_LIMITS,
             fee_calculator_mode=InjectiveMessageBasedTransactionFeeCalculatorMode(),
         )
@@ -322,12 +321,10 @@ class InjectiveVaultsDataSourceTests(TestCase):
         self.assertEqual(self._vault_address, messages[0].contract)
 
         market = self._inj_usdt_market_info()
-        base_token_decimals = market.base_token.decimals
-        quote_token_meta = market.quote_token.decimals
         message_data = json.loads(messages[0].msg.decode())
 
-        message_price = (order.price * Decimal(f"1e{quote_token_meta-base_token_decimals}")).normalize()
-        message_quantity = (order.amount * Decimal(f"1e{base_token_decimals}")).normalize()
+        message_price = order.price.normalize()
+        message_quantity = order.amount.normalize()
 
         expected_data = {
             "admin_execute_message": {
@@ -378,14 +375,12 @@ class InjectiveVaultsDataSourceTests(TestCase):
         )
 
         orders_data = []
-        composer = asyncio.get_event_loop().run_until_complete(self.data_source.composer())
-        order_data = composer.OrderData(
+        composer: Composer = asyncio.get_event_loop().run_until_complete(self.data_source.composer())
+        order_data = composer.create_order_data_without_mask_v2(
             market_id=market.id,
             subaccount_id="1",
             cid="client order id",
             order_hash="0xba954bc613a81cd712b9ec0a3afbfc94206cf2ff8c60d1868e031d59ea82bf27",  # noqa: mock"
-            order_direction="buy",
-            order_type="limit",
         )
         orders_data.append(order_data)
 
@@ -421,7 +416,7 @@ class InjectiveVaultsDataSourceTests(TestCase):
                                         "subaccount_id": "1",
                                         "order_hash": "0xba954bc613a81cd712b9ec0a3afbfc94206cf2ff8c60d1868e031d59ea82bf27",  # noqa: mock"
                                         "cid": "client order id",
-                                        "order_mask": 74,
+                                        "order_mask": 1,
                                     }
                                 ],
                                 "derivative_orders_to_cancel": [],

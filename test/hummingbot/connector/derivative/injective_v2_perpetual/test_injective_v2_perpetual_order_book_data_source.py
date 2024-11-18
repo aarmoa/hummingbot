@@ -278,9 +278,6 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
         )
         derivative_markets_response = self._derivative_markets_response()
         self.query_executor._derivative_markets_responses.put_nowait(derivative_markets_response)
-        derivative_market = list(derivative_markets_response.values())[0]
-
-        quote_decimals = derivative_market.quote_token.decimals
 
         order_hash = "0x070e2eb3d361c8b26eae510f481bed513a1fb89c0869463a387cfa7995a27043"  # noqa: mock
 
@@ -328,7 +325,7 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
 
         expected_timestamp = int(trade_data["blockTime"]) * 1e-3
         expected_price = Decimal(trade_data["derivativeTrades"][0]["positionDelta"]["executionPrice"]) * Decimal(
-            f"1e{-quote_decimals-18}")
+            "1e-18")
         expected_amount = Decimal(trade_data["derivativeTrades"][0]["positionDelta"]["executionQuantity"]) * Decimal(
             "1e-18")
         expected_trade_id = trade_data["derivativeTrades"][0]["tradeId"]
@@ -424,9 +421,6 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
         )
         derivative_markets_response = self._derivative_markets_response()
         self.query_executor._derivative_markets_responses.put_nowait(derivative_markets_response)
-        derivative_market = list(derivative_markets_response.values())[0]
-
-        quote_decimals = derivative_market.quote_token.decimals
 
         order_book_data = {
             "blockHeight": "20583",
@@ -486,7 +480,7 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
         self.assertEqual(2, len(bids))
         first_bid_price = Decimal(
             order_book_data["derivativeOrderbookUpdates"][0]["orderbook"]["buyLevels"][1]["p"]) * Decimal(
-            f"1e{-quote_decimals-18}")
+            "1e-18")
         first_bid_quantity = Decimal(
             order_book_data["derivativeOrderbookUpdates"][0]["orderbook"]["buyLevels"][1]["q"]) * Decimal("1e-18")
         self.assertEqual(float(first_bid_price), bids[0].price)
@@ -495,7 +489,7 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
         self.assertEqual(1, len(asks))
         first_ask_price = Decimal(
             order_book_data["derivativeOrderbookUpdates"][0]["orderbook"]["sellLevels"][0]["p"]) * Decimal(
-            f"1e{-quote_decimals-18}")
+            "1e-18")
         first_ask_quantity = Decimal(
             order_book_data["derivativeOrderbookUpdates"][0]["orderbook"]["sellLevels"][0]["q"]) * Decimal("1e-18")
         self.assertEqual(float(first_ask_price), asks[0].price)
@@ -586,42 +580,40 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
         self.query_executor._derivative_market_responses.put_nowait(
             {
                 "market": {
-                    "marketId": self.market_id,
-                    "marketStatus": "active",
-                    "ticker": f"{self.ex_trading_pair} PERP",
-                    "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
-                    "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
-                    "oracleType": "pyth",
-                    "oracleScaleFactor": 6,
-                    "initialMarginRatio": "0.195",
-                    "maintenanceMarginRatio": "0.05",
-                    "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
-                    "quoteTokenMeta": {
-                        "name": "Testnet Tether USDT",
-                        "address": "0x0000000000000000000000000000000000000000",  # noqa: mock
-                        "symbol": self.quote_asset,
-                        "logo": "https://static.alchemyapi.io/images/assets/825.png",
-                        "decimals": 6,
-                        "updatedAt": "1687190809716"
+                    "market": {
+                        "ticker": f"{self.ex_trading_pair} PERP",
+                        "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
+                        "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
+                        "oracleType": "pyth",
+                        "oracleScaleFactor": 6,
+                        "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
+                        "marketId": self.market_id,
+                        "marketStatus": "active",
+                        "initialMarginRatio": "0.195",
+                        "maintenanceMarginRatio": "0.05",
+                        "makerFeeRate": "-0.0003",
+                        "takerFeeRate": "0.003",
+                        "relayerFeeShareRate": "0.4",
+                        "isPerpetual": True,
+                        "minPriceTickSize": "0.001",
+                        "minQuantityTickSize": "0.0001",
+                        "minNotional": "1",
+                        "quoteDecimals": 6
                     },
-                    "makerFeeRate": "-0.0003",
-                    "takerFeeRate": "0.003",
-                    "serviceProviderFee": "0.4",
-                    "isPerpetual": True,
-                    "minPriceTickSize": "100",
-                    "minQuantityTickSize": "0.0001",
-                    "perpetualMarketInfo": {
-                        "hourlyFundingRateCap": "0.000625",
-                        "hourlyInterestRate": "0.00000416666",
-                        "nextFundingTimestamp": "1687190809716",
-                        "fundingInterval": "3600"
-                    },
-                    "perpetualMarketFunding": {
-                        "cumulativeFunding": "81363.592243119007273334",
-                        "cumulativePrice": "1.432536051546776736",
-                        "lastTimestamp": "1689423842"
-                    },
-                    "minNotional": "1000000",
+                    "perpetualInfo": {
+                        "marketInfo": {
+                            "marketId": self.market_id,
+                            "hourlyFundingRateCap": "0.000625",
+                            "hourlyInterestRate": "0.00000416666",
+                            "nextFundingTimestamp": "1687190809716",
+                            "fundingInterval": "3600",
+                        },
+                        "fundingInfo": {
+                            "cumulativeFunding": "81363.592243119007273334",
+                            "cumulativePrice": "1.432536051546776736",
+                            "lastTimestamp": "1689423842"
+                        },
+                    }
                 }
             }
         )
@@ -732,42 +724,40 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
 
         derivative_market_info = {
             "market": {
-                "marketId": self.market_id,
-                "marketStatus": "active",
-                "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
-                "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
-                "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
-                "oracleType": "pyth",
-                "oracleScaleFactor": 6,
-                "initialMarginRatio": "0.195",
-                "maintenanceMarginRatio": "0.05",
-                "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
-                "quoteTokenMeta": {
-                    "name": "Testnet Tether USDT",
-                    "address": "0x0000000000000000000000000000000000000000",  # noqa: mock
-                    "symbol": self.quote_asset,
-                    "logo": "https://static.alchemyapi.io/images/assets/825.png",
-                    "decimals": 6,
-                    "updatedAt": "1687190809716"
+                "market": {
+                    "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
+                    "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
+                    "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
+                    "oracleType": "pyth",
+                    "oracleScaleFactor": 6,
+                    "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
+                    "marketId": self.market_id,
+                    "marketStatus": "active",
+                    "initialMarginRatio": "0.195",
+                    "maintenanceMarginRatio": "0.05",
+                    "makerFeeRate": "-0.0003",
+                    "takerFeeRate": "0.003",
+                    "relayerFeeShareRate": "0.4",
+                    "isPerpetual": True,
+                    "minPriceTickSize": "0.001",
+                    "minQuantityTickSize": "0.0001",
+                    "minNotional": "1",
+                    "quoteDecimals": 6
                 },
-                "makerFeeRate": "-0.0003",
-                "takerFeeRate": "0.003",
-                "serviceProviderFee": "0.4",
-                "isPerpetual": True,
-                "minPriceTickSize": "100",
-                "minQuantityTickSize": "0.0001",
-                "perpetualMarketInfo": {
-                    "hourlyFundingRateCap": "0.000625",
-                    "hourlyInterestRate": "0.00000416666",
-                    "nextFundingTimestamp": "1687190809716",
-                    "fundingInterval": "3600"
-                },
-                "perpetualMarketFunding": {
-                    "cumulativeFunding": "81363.592243119007273334",
-                    "cumulativePrice": "1.432536051546776736",
-                    "lastTimestamp": "1689423842"
-                },
-                "minNotional": "1000000",
+                "perpetualInfo": {
+                    "marketInfo": {
+                        "marketId": self.market_id,
+                        "hourlyFundingRateCap": "0.000625",
+                        "hourlyInterestRate": "0.00000416666",
+                        "nextFundingTimestamp": "1687190809716",
+                        "fundingInterval": "3600",
+                    },
+                    "fundingInfo": {
+                        "cumulativeFunding": "81363.592243119007273334",
+                        "cumulativePrice": "1.432536051546776736",
+                        "lastTimestamp": "1689423842"
+                    },
+                }
             }
         }
         self.query_executor._derivative_market_responses.put_nowait(derivative_market_info)
@@ -812,7 +802,7 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
             funding_info.index_price)
         self.assertEqual(Decimal(oracle_price["price"]), funding_info.mark_price)
         self.assertEqual(
-            int(derivative_market_info["market"]["perpetualMarketInfo"]["nextFundingTimestamp"]),
+            int(derivative_market_info["market"]["perpetualInfo"]["marketInfo"]["nextFundingTimestamp"]),
             funding_info.next_funding_utc_timestamp)
         self.assertEqual(Decimal(funding_rate["fundingRates"][0]["rate"]), funding_info.rate)
 
@@ -879,42 +869,40 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
 
         derivative_market_info = {
             "market": {
-                "marketId": self.market_id,
-                "marketStatus": "active",
-                "ticker": f"{self.ex_trading_pair} PERP",
-                "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
-                "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
-                "oracleType": "pyth",
-                "oracleScaleFactor": 6,
-                "initialMarginRatio": "0.195",
-                "maintenanceMarginRatio": "0.05",
-                "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
-                "quoteTokenMeta": {
-                    "name": "Testnet Tether USDT",
-                    "address": "0x0000000000000000000000000000000000000000",  # noqa: mock
-                    "symbol": self.quote_asset,
-                    "logo": "https://static.alchemyapi.io/images/assets/825.png",
-                    "decimals": 6,
-                    "updatedAt": "1687190809716"
+                "market": {
+                    "ticker": f"{self.ex_trading_pair} PERP",
+                    "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
+                    "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
+                    "oracleType": "pyth",
+                    "oracleScaleFactor": 6,
+                    "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
+                    "marketId": self.market_id,
+                    "marketStatus": "active",
+                    "initialMarginRatio": "0.195",
+                    "maintenanceMarginRatio": "0.05",
+                    "makerFeeRate": "-0.0003",
+                    "takerFeeRate": "0.003",
+                    "relayerFeeShareRate": "0.4",
+                    "isPerpetual": True,
+                    "minPriceTickSize": "0.001",
+                    "minQuantityTickSize": "0.0001",
+                    "minNotional": "1",
+                    "quoteDecimals": 6
                 },
-                "makerFeeRate": "-0.0003",
-                "takerFeeRate": "0.003",
-                "serviceProviderFee": "0.4",
-                "isPerpetual": True,
-                "minPriceTickSize": "100",
-                "minQuantityTickSize": "0.0001",
-                "perpetualMarketInfo": {
-                    "hourlyFundingRateCap": "0.000625",
-                    "hourlyInterestRate": "0.00000416666",
-                    "nextFundingTimestamp": "1687190809716",
-                    "fundingInterval": "3600"
-                },
-                "perpetualMarketFunding": {
-                    "cumulativeFunding": "81363.592243119007273334",
-                    "cumulativePrice": "1.432536051546776736",
-                    "lastTimestamp": "1689423842"
-                },
-                "minNotional": "1000000",
+                "perpetualInfo": {
+                    "marketInfo": {
+                        "marketId": self.market_id,
+                        "hourlyFundingRateCap": "0.000625",
+                        "hourlyInterestRate": "0.00000416666",
+                        "nextFundingTimestamp": "1687190809716",
+                        "fundingInterval": "3600",
+                    },
+                    "fundingInfo": {
+                        "cumulativeFunding": "81363.592243119007273334",
+                        "cumulativePrice": "1.432536051546776736",
+                        "lastTimestamp": "1689423842"
+                    },
+                }
             }
         }
         self.query_executor._derivative_market_responses.put_nowait(derivative_market_info)
@@ -929,7 +917,7 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
             funding_info.index_price)
         self.assertEqual(Decimal(oracle_price["price"]), funding_info.mark_price)
         self.assertEqual(
-            int(derivative_market_info["market"]["perpetualMarketInfo"]["nextFundingTimestamp"]),
+            int(derivative_market_info["market"]["perpetualInfo"]["marketInfo"]["nextFundingTimestamp"]),
             funding_info.next_funding_utc_timestamp)
         self.assertEqual(Decimal(funding_rate["fundingRates"][0]["rate"]), funding_info.rate)
 
@@ -962,9 +950,9 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
             maker_fee_rate=Decimal("-0.0001"),
             taker_fee_rate=Decimal("0.001"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("0.000000000000001"),
-            min_quantity_tick_size=Decimal("1000000000000000"),
-            min_notional=Decimal("1000000"),
+            min_price_tick_size=Decimal("0.001"),
+            min_quantity_tick_size=Decimal("0.01"),
+            min_notional=Decimal("1"),
         )
 
         return {native_market.id: native_market}
@@ -994,9 +982,9 @@ class InjectiveV2APIOrderBookDataSourceTests(TestCase):
             maker_fee_rate=Decimal("-0.0003"),
             taker_fee_rate=Decimal("0.003"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("100"),
+            min_price_tick_size=Decimal("0.001"),
             min_quantity_tick_size=Decimal("0.0001"),
-            min_notional=Decimal("1000000"),
+            min_notional=Decimal("1"),
         )
 
         return {native_market.id: native_market}

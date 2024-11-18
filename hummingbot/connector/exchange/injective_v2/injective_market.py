@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
+from pyinjective.constant import ADDITIONAL_CHAIN_FORMAT_DECIMALS
 from pyinjective.core.market import DerivativeMarket, SpotMarket
 from pyinjective.core.token import Token
 
@@ -33,7 +34,7 @@ class InjectiveToken:
         return chain_value * scaler
 
     def value_from_special_chain_format(self, chain_value: Decimal) -> Decimal:
-        scaler = Decimal(f"1e{-self.decimals-18}")
+        scaler = Decimal(f"1e{-self.decimals-ADDITIONAL_CHAIN_FORMAT_DECIMALS}")
         return chain_value * scaler
 
 
@@ -63,10 +64,10 @@ class InjectiveSpotMarket:
         return self.price_from_chain_format(chain_price=price)
 
     def min_price_tick_size(self) -> Decimal:
-        return self.price_from_chain_format(chain_price=self.native_market.min_price_tick_size)
+        return self.native_market.min_price_tick_size
 
     def min_quantity_tick_size(self) -> Decimal:
-        return self.quantity_from_chain_format(chain_quantity=self.native_market.min_quantity_tick_size)
+        return self.native_market.min_quantity_tick_size
 
     def maker_fee_rate(self) -> Decimal:
         return self.native_market.maker_fee_rate
@@ -75,7 +76,7 @@ class InjectiveSpotMarket:
         return self.native_market.taker_fee_rate
 
     def min_notional(self) -> Decimal:
-        return self.quote_token.value_from_chain_format(chain_value=self.native_market.min_notional)
+        return self.native_market.min_notional
 
 
 @dataclass(frozen=True)
@@ -108,10 +109,10 @@ class InjectiveDerivativeMarket:
         return self.price_from_chain_format(chain_price=price)
 
     def min_price_tick_size(self) -> Decimal:
-        return self.price_from_chain_format(chain_price=self.native_market.min_price_tick_size)
+        return self.native_market.min_price_tick_size
 
     def min_quantity_tick_size(self) -> Decimal:
-        return self.quantity_from_chain_format(chain_quantity=self.native_market.min_quantity_tick_size)
+        return self.native_market.min_quantity_tick_size
 
     def maker_fee_rate(self) -> Decimal:
         return self.native_market.maker_fee_rate
@@ -129,4 +130,4 @@ class InjectiveDerivativeMarket:
         return self.native_market.oracle_type
 
     def min_notional(self) -> Decimal:
-        return self.quote_token.value_from_chain_format(chain_value=self.native_market.min_notional)
+        return self.native_market.min_notional

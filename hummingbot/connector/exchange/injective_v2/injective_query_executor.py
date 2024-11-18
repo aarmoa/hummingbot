@@ -167,7 +167,7 @@ class PythonSDKInjectiveQueryExecutor(BaseInjectiveQueryExecutor):
         return await self._sdk_client.all_tokens()
 
     async def derivative_market(self, market_id: str) -> Dict[str, Any]:  # pragma: no cover
-        response = await self._sdk_client.fetch_derivative_market(market_id=market_id)
+        response = await self._sdk_client.fetch_chain_derivative_market_v2(market_id=market_id)
         return response
 
     async def get_spot_orderbook(self, market_id: str) -> Dict[str, Any]:  # pragma: no cover

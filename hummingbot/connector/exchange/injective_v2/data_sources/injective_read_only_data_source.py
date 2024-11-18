@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Mapping, Optional
 from google.protobuf import any_pb2
 from pyinjective import Transaction
 from pyinjective.async_client import AsyncClient
-from pyinjective.composer import Composer, injective_exchange_tx_pb
+from pyinjective.composer import Composer, injective_exchange_tx_v2_pb
 from pyinjective.core.network import Network
 
 from hummingbot.connector.exchange.injective_v2 import injective_constants as CONSTANTS
@@ -32,12 +32,10 @@ class InjectiveReadOnlyDataSource(InjectiveDataSource):
     def __init__(
             self,
             network: Network,
-            rate_limits: List[RateLimit],
-            use_secure_connection: bool = True):
+            rate_limits: List[RateLimit],):
         self._network = network
         self._client = AsyncClient(
             network=self._network,
-            insecure=not use_secure_connection,
         )
         self._composer = None
         self._query_executor = PythonSDKInjectiveQueryExecutor(sdk_client=self._client)
@@ -277,15 +275,15 @@ class InjectiveReadOnlyDataSource(InjectiveDataSource):
 
     async def _order_cancel_message(
             self,
-            spot_orders_to_cancel: List[injective_exchange_tx_pb.OrderData],
-            derivative_orders_to_cancel: List[injective_exchange_tx_pb.OrderData]
+            spot_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData],
+            derivative_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData]
     ) -> any_pb2.Any:
         raise NotImplementedError
 
     async def _all_subaccount_orders_cancel_message(
             self,
-            spot_orders_to_cancel: List[injective_exchange_tx_pb.OrderData],
-            derivative_orders_to_cancel: List[injective_exchange_tx_pb.OrderData]
+            spot_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData],
+            derivative_orders_to_cancel: List[injective_exchange_tx_v2_pb.OrderData]
     ) -> any_pb2.Any:
         raise NotImplementedError
 
@@ -293,7 +291,7 @@ class InjectiveReadOnlyDataSource(InjectiveDataSource):
             self,
             order: GatewayInFlightOrder,
             market_id: str,
-    ) -> injective_exchange_tx_pb.OrderData:
+    ) -> injective_exchange_tx_v2_pb.OrderData:
         raise NotImplementedError
 
     async def _updated_derivative_market_info_for_id(self, market_id: str) -> Dict[str, Any]:

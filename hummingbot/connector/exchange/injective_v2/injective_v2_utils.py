@@ -115,10 +115,6 @@ class InjectiveNetworkMode(BaseClientModel, ABC):
     def network(self) -> Network:
         pass
 
-    @abstractmethod
-    def use_secure_connection(self) -> bool:
-        pass
-
 
 class InjectiveMainnetNetworkMode(InjectiveNetworkMode):
 
@@ -127,9 +123,6 @@ class InjectiveMainnetNetworkMode(InjectiveNetworkMode):
 
     def network(self) -> Network:
         return Network.mainnet()
-
-    def use_secure_connection(self) -> bool:
-        return True
 
     def rate_limits(self) -> List[RateLimit]:
         return CONSTANTS.PUBLIC_NODE_RATE_LIMITS
@@ -155,9 +148,6 @@ class InjectiveTestnetNetworkMode(InjectiveNetworkMode):
 
     def network(self) -> Network:
         return Network.testnet(node=self.testnet_node)
-
-    def use_secure_connection(self) -> bool:
-        return True
 
     def rate_limits(self) -> List[RateLimit]:
         return CONSTANTS.PUBLIC_NODE_RATE_LIMITS
@@ -220,13 +210,6 @@ class InjectiveCustomNetworkMode(InjectiveNetworkMode):
             prompt_on_new=True
         ),
     )
-    secure_connection: bool = Field(
-        default=...,
-        client_data=ClientFieldData(
-            prompt=lambda cm: ("Should this configuration use secure connections? (yes/no)"),
-            prompt_on_new=True
-        ),
-    )
 
     class Config:
         title = "custom_network"
@@ -243,9 +226,6 @@ class InjectiveCustomNetworkMode(InjectiveNetworkMode):
             env=self.env,
             official_tokens_list_url=Network.mainnet().official_tokens_list_url,
         )
-
-    def use_secure_connection(self) -> bool:
-        return self.secure_connection
 
     def rate_limits(self) -> List[RateLimit]:
         return CONSTANTS.CUSTOM_NODE_RATE_LIMITS
@@ -267,7 +247,6 @@ class InjectiveAccountMode(BaseClientModel, ABC):
     def create_data_source(
             self,
             network: Network,
-            use_secure_connection: bool,
             rate_limits: List[RateLimit],
             fee_calculator_mode: InjectiveFeeCalculatorMode,
     ) -> "InjectiveDataSource":
@@ -322,7 +301,6 @@ class InjectiveDelegatedAccountMode(InjectiveAccountMode):
     def create_data_source(
             self,
             network: Network,
-            use_secure_connection: bool,
             rate_limits: List[RateLimit],
             fee_calculator_mode: InjectiveFeeCalculatorMode,
     ) -> "InjectiveDataSource":
@@ -332,7 +310,6 @@ class InjectiveDelegatedAccountMode(InjectiveAccountMode):
             granter_address=self.granter_address,
             granter_subaccount_index=self.granter_subaccount_index,
             network=network,
-            use_secure_connection=use_secure_connection,
             rate_limits=rate_limits,
             fee_calculator_mode=fee_calculator_mode,
         )
@@ -374,7 +351,6 @@ class InjectiveVaultAccountMode(InjectiveAccountMode):
     def create_data_source(
             self,
             network: Network,
-            use_secure_connection: bool,
             rate_limits: List[RateLimit],
             fee_calculator_mode: InjectiveFeeCalculatorMode,
     ) -> "InjectiveDataSource":
@@ -384,7 +360,6 @@ class InjectiveVaultAccountMode(InjectiveAccountMode):
             vault_contract_address=self.vault_contract_address,
             vault_subaccount_index=self.vault_subaccount_index,
             network=network,
-            use_secure_connection=use_secure_connection,
             rate_limits=rate_limits,
             fee_calculator_mode=fee_calculator_mode,
         )
@@ -397,13 +372,12 @@ class InjectiveReadOnlyAccountMode(InjectiveAccountMode):
 
     def create_data_source(
             self,
-            network: Network, use_secure_connection: bool,
+            network: Network,
             rate_limits: List[RateLimit],
             fee_calculator_mode: InjectiveFeeCalculatorMode,
     ) -> "InjectiveDataSource":
         return InjectiveReadOnlyDataSource(
             network=network,
-            use_secure_connection=use_secure_connection,
             rate_limits=rate_limits,
         )
 
@@ -486,7 +460,6 @@ class InjectiveConfigMap(BaseConnectorConfigMap):
     def create_data_source(self):
         return self.account_type.create_data_source(
             network=self.network.network(),
-            use_secure_connection=self.network.use_secure_connection(),
             rate_limits=self.network.rate_limits(),
             fee_calculator_mode=self.fee_calculator,
         )

@@ -254,9 +254,9 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             maker_fee_rate=Decimal("-0.0003"),
             taker_fee_rate=Decimal("0.003"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("100"),
+            min_price_tick_size=Decimal("0.001"),
             min_quantity_tick_size=Decimal("0.0001"),
-            min_notional=Decimal("1000000"),
+            min_notional=Decimal("1"),
         )
 
         return ("INVALID_MARKET", response)
@@ -409,10 +409,9 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
     @property
     def expected_trading_rule(self):
         market = list(self.all_derivative_markets_mock_response.values())[0]
-        min_price_tick_size = (market.min_price_tick_size
-                               * Decimal(f"1e{-market.quote_token.decimals}"))
+        min_price_tick_size = market.min_price_tick_size
         min_quantity_tick_size = market.min_quantity_tick_size
-        min_notional = market.min_notional * Decimal(f"1e{-market.quote_token.decimals}")
+        min_notional = market.min_notional
         trading_rule = TradingRule(
             trading_pair=self.trading_pair,
             min_order_size=min_quantity_tick_size,
@@ -489,9 +488,9 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             maker_fee_rate=Decimal("-0.0001"),
             taker_fee_rate=Decimal("0.001"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("0.000000000000001"),
-            min_quantity_tick_size=Decimal("1000000000000000"),
-            min_notional=Decimal("1000000"),
+            min_price_tick_size=Decimal("0.001"),
+            min_quantity_tick_size=Decimal("0.01"),
+            min_notional=Decimal("1"),
         )
 
         return {native_market.id: native_market}
@@ -522,9 +521,9 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             maker_fee_rate=Decimal("-0.0003"),
             taker_fee_rate=Decimal("0.003"),
             service_provider_fee=Decimal("0.4"),
-            min_price_tick_size=Decimal("100"),
+            min_price_tick_size=Decimal("0.001"),
             min_quantity_tick_size=Decimal("0.0001"),
-            min_notional=Decimal("1000000"),
+            min_notional=Decimal("1"),
         )
 
         return {native_market.id: native_market}
@@ -790,7 +789,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             "derivativeOrders": [
                 {
                     "status": "Booked",
-                    "orderHash": base64.b64encode(bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
+                    "orderHash": order.exchange_order_id,
                     "cid": order.client_order_id,
                     "order": {
                         "marketId": self.market_id,
@@ -799,7 +798,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
                                 "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id,
                             },
@@ -830,7 +829,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             "derivativeOrders": [
                 {
                     "status": "Cancelled",
-                    "orderHash": base64.b64encode(bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
+                    "orderHash": order.exchange_order_id,
                     "cid": order.client_order_id,
                     "order": {
                         "marketId": self.market_id,
@@ -839,7 +838,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
                                 "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id,
                             },
@@ -870,7 +869,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
             "derivativeOrders": [
                 {
                     "status": "Matched",
-                    "orderHash": base64.b64encode(bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
+                    "orderHash": order.exchange_order_id,
                     "cid": order.client_order_id,
                     "order": {
                         "marketId": self.market_id,
@@ -879,7 +878,7 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
                                 "subaccountId": self.portfolio_account_subaccount_id,
                                 "feeRecipient": self.portfolio_account_injective_address,
                                 "price": str(
-                                    int(order.price * Decimal(f"1e{self.quote_decimals + 18}"))),
+                                    int(order.price * Decimal("1e18"))),
                                 "quantity": str(int(order.amount * Decimal("1e18"))),
                                 "cid": order.client_order_id,
                             },
@@ -915,10 +914,10 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
                         "isLong": True,
                         "executionQuantity": str(int(order.amount * Decimal("1e18"))),
                         "executionMargin": "186681600000000000000000000",
-                        "executionPrice": str(int(order.price * Decimal(f"1e{self.quote_decimals + 18}"))),
+                        "executionPrice": str(int(order.price * Decimal("1e18"))),
                     },
                     "payout": "207636617326923969135747808",
-                    "fee": str(self.expected_fill_fee.flat_fees[0].amount * Decimal(f"1e{self.quote_decimals + 18}")),
+                    "fee": str(self.expected_fill_fee.flat_fees[0].amount * Decimal("1e18")),
                     "orderHash": base64.b64encode(bytes.fromhex(order.exchange_order_id.replace("0x", ""))).decode(),
                     "feeRecipientAddress": self.portfolio_account_injective_address,
                     "cid": order.client_order_id,
@@ -2292,42 +2291,40 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
         self.exchange._data_source._query_executor._derivative_market_responses.put_nowait(
             {
                 "market": {
-                    "marketId": self.market_id,
-                    "marketStatus": "active",
-                    "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
-                    "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
-                    "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
-                    "oracleType": "pyth",
-                    "oracleScaleFactor": 6,
-                    "initialMarginRatio": "0.195",
-                    "maintenanceMarginRatio": "0.05",
-                    "quoteDenom": self.quote_asset_denom,
-                    "quoteTokenMeta": {
-                        "name": "Testnet Tether USDT",
-                        "address": "0x0000000000000000000000000000000000000000",  # noqa: mock
-                        "symbol": self.quote_asset,
-                        "logo": "https://static.alchemyapi.io/images/assets/825.png",
-                        "decimals": self.quote_decimals,
-                        "updatedAt": "1687190809716"
+                    "market": {
+                        "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
+                        "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3", # noqa: mock
+                        "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",# noqa: mock
+                        "oracleType": "pyth",
+                        "oracleScaleFactor": 6,
+                        "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
+                        "marketId": self.market_id,
+                        "marketStatus": "active",
+                        "initialMarginRatio": "0.195",
+                        "maintenanceMarginRatio": "0.05",
+                        "makerFeeRate": "-0.0003",
+                        "takerFeeRate": "0.003",
+                        "relayerFeeShareRate": "0.4",
+                        "isPerpetual": True,
+                        "minPriceTickSize": "0.001",
+                        "minQuantityTickSize": "0.0001",
+                        "minNotional": "1",
+                        "quoteDecimals": 6
                     },
-                    "makerFeeRate": "-0.0003",
-                    "takerFeeRate": "0.003",
-                    "serviceProviderFee": "0.4",
-                    "isPerpetual": True,
-                    "minPriceTickSize": "100",
-                    "minQuantityTickSize": "0.0001",
-                    "perpetualMarketInfo": {
-                        "hourlyFundingRateCap": "0.000625",
-                        "hourlyInterestRate": "0.00000416666",
-                        "nextFundingTimestamp": str(self.target_funding_info_next_funding_utc_timestamp),
-                        "fundingInterval": "3600"
-                    },
-                    "perpetualMarketFunding": {
-                        "cumulativeFunding": "81363.592243119007273334",
-                        "cumulativePrice": "1.432536051546776736",
-                        "lastTimestamp": "1689423842"
-                    },
-                    "minNotional": "1000000",
+                    "perpetualInfo": {
+                        "marketInfo": {
+                            "marketId": self.market_id,
+                            "hourlyFundingRateCap": "0.000625",
+                            "hourlyInterestRate": "0.00000416666",
+                            "nextFundingTimestamp": str(self.target_funding_info_next_funding_utc_timestamp),
+                            "fundingInterval": "3600",
+                        },
+                        "fundingInfo": {
+                            "cumulativeFunding": "81363.592243119007273334",
+                            "cumulativePrice": "1.432536051546776736",
+                            "lastTimestamp": "1689423842"
+                        },
+                    }
                 }
             }
         )
@@ -2417,42 +2414,40 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
         self.exchange._data_source._query_executor._derivative_market_responses.put_nowait(
             {
                 "market": {
-                    "marketId": self.market_id,
-                    "marketStatus": "active",
-                    "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
-                    "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3",  # noqa: mock
-                    "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",  # noqa: mock
-                    "oracleType": "pyth",
-                    "oracleScaleFactor": 6,
-                    "initialMarginRatio": "0.195",
-                    "maintenanceMarginRatio": "0.05",
-                    "quoteDenom": self.quote_asset_denom,
-                    "quoteTokenMeta": {
-                        "name": "Testnet Tether USDT",
-                        "address": "0x0000000000000000000000000000000000000000",  # noqa: mock
-                        "symbol": self.quote_asset,
-                        "logo": "https://static.alchemyapi.io/images/assets/825.png",
-                        "decimals": self.quote_decimals,
-                        "updatedAt": "1687190809716"
+                    "market": {
+                        "ticker": f"{self.base_asset}/{self.quote_asset} PERP",
+                        "oracleBase": "0x2d9315a88f3019f8efa88dfe9c0f0843712da0bac814461e27733f6b83eb51b3", # noqa: mock
+                        "oracleQuote": "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",# noqa: mock
+                        "oracleType": "pyth",
+                        "oracleScaleFactor": 6,
+                        "quoteDenom": "peggy0x87aB3B4C8661e07D6372361211B96ed4Dc36B1B5",  # noqa: mock
+                        "marketId": self.market_id,
+                        "marketStatus": "active",
+                        "initialMarginRatio": "0.195",
+                        "maintenanceMarginRatio": "0.05",
+                        "makerFeeRate": "-0.0003",
+                        "takerFeeRate": "0.003",
+                        "relayerFeeShareRate": "0.4",
+                        "isPerpetual": True,
+                        "minPriceTickSize": "0.001",
+                        "minQuantityTickSize": "0.0001",
+                        "minNotional": "1",
+                        "quoteDecimals": 6
                     },
-                    "makerFeeRate": "-0.0003",
-                    "takerFeeRate": "0.003",
-                    "serviceProviderFee": "0.4",
-                    "isPerpetual": True,
-                    "minPriceTickSize": "100",
-                    "minQuantityTickSize": "0.0001",
-                    "perpetualMarketInfo": {
-                        "hourlyFundingRateCap": "0.000625",
-                        "hourlyInterestRate": "0.00000416666",
-                        "nextFundingTimestamp": str(self.target_funding_info_next_funding_utc_timestamp),
-                        "fundingInterval": "3600"
-                    },
-                    "perpetualMarketFunding": {
-                        "cumulativeFunding": "81363.592243119007273334",
-                        "cumulativePrice": "1.432536051546776736",
-                        "lastTimestamp": "1689423842"
-                    },
-                    "minNotional": "1000000",
+                    "perpetualInfo": {
+                        "marketInfo": {
+                            "marketId": self.market_id,
+                            "hourlyFundingRateCap": "0.000625",
+                            "hourlyInterestRate": "0.00000416666",
+                            "nextFundingTimestamp": "1687190809716",
+                            "fundingInterval": "3600",
+                        },
+                        "fundingInfo": {
+                            "cumulativeFunding": "81363.592243119007273334",
+                            "cumulativePrice": "1.432536051546776736",
+                            "lastTimestamp": "1689423842"
+                        },
+                    }
                 }
             }
         )
@@ -2636,9 +2631,9 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
         self.assertEqual(PositionSide.LONG, pos.position_side)
         quantity = Decimal(position_data["positions"][0]["quantity"]) * Decimal("1e-18")
         self.assertEqual(quantity, pos.amount)
-        entry_price = Decimal(position_data["positions"][0]["entryPrice"]) * Decimal(f"1e{-self.quote_decimals-18}")
+        entry_price = Decimal(position_data["positions"][0]["entryPrice"]) * Decimal("1e-18")
         self.assertEqual(entry_price, pos.entry_price)
-        margin = Decimal(position_data["positions"][0]["margin"]) * Decimal(f"1e{-self.quote_decimals - 18}")
+        margin = Decimal(position_data["positions"][0]["margin"]) * Decimal("1e-18")
         expected_leverage = ((entry_price * quantity) / margin)
         self.assertEqual(expected_leverage, pos.leverage)
         mark_price = Decimal(oracle_price["price"])
@@ -3215,16 +3210,14 @@ class InjectiveV2PerpetualDerivativeTests(AbstractPerpetualDerivativeTests.Perpe
                 "gasUsed": "90749"
             },
             "result": {
-                "data": "Em8KJS9jb3Ntb3MuYXV0aHoudjFiZXRhMS5Nc2dFeGVjUmVzcG9uc2USRgpECkIweGYxNGU5NGMxZmQ0MjE0M2I3ZGRhZjA4ZDE3ZWMxNzAzZGMzNzZlOWU2YWI0YjY0MjBhMzNkZTBhZmFlYzJjMTA=",
-                # noqa: mock
+                "data": "Em8KJS9jb3Ntb3MuYXV0aHoudjFiZXRhMS5Nc2dFeGVjUmVzcG9uc2USRgpECkIweGYxNGU5NGMxZmQ0MjE0M2I3ZGRhZjA4ZDE3ZWMxNzAzZGMzNzZlOWU2YWI0YjY0MjBhMzNkZTBhZmFlYzJjMTA=", # noqa: mock
                 "log": "",
                 "events": [],
                 "msgResponses": [
                     OrderedDict([
                         ("@type", "/cosmos.authz.v1beta1.MsgExecResponse"),
                         ("results", [
-                            "CkIweGYxNGU5NGMxZmQ0MjE0M2I3ZGRhZjA4ZDE3ZWMxNzAzZGMzNzZlOWU2YWI0YjY0MjBhMzNkZTBhZmFlYzJjMTA="])
-                        # noqa: mock
+                            "CkIweGYxNGU5NGMxZmQ0MjE0M2I3ZGRhZjA4ZDE3ZWMxNzAzZGMzNzZlOWU2YWI0YjY0MjBhMzNkZTBhZmFlYzJjMTA="]) # noqa: mock
                     ])
                 ]
             }
