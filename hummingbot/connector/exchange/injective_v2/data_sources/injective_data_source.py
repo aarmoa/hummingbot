@@ -802,11 +802,11 @@ class InjectiveDataSource(ABC):
             oracle_price_symbols.add(derivative_market_info.oracle_base())
             oracle_price_symbols.add(derivative_market_info.oracle_quote())
 
-        subaccount_deposits_filter = composer.chain_stream_subaccount_deposits_filter(subaccount_ids=subaccount_ids)
+        subaccount_deposits_filter = composer.chain_stream_subaccount_deposits_v2_filter(subaccount_ids=subaccount_ids)
         if len(spot_market_ids) > 0:
-            spot_orderbooks_filter = composer.chain_stream_orderbooks_filter(market_ids=spot_market_ids)
-            spot_trades_filter = composer.chain_stream_trades_filter(market_ids=spot_market_ids)
-            spot_orders_filter = composer.chain_stream_orders_filter(
+            spot_orderbooks_filter = composer.chain_stream_orderbooks_v2_filter(market_ids=spot_market_ids)
+            spot_trades_filter = composer.chain_stream_trades_v2_filter(market_ids=spot_market_ids)
+            spot_orders_filter = composer.chain_stream_orders_v2_filter(
                 subaccount_ids=subaccount_ids, market_ids=spot_market_ids,
             )
         else:
@@ -815,15 +815,15 @@ class InjectiveDataSource(ABC):
             spot_orders_filter = None
 
         if len(derivative_market_ids) > 0:
-            derivative_orderbooks_filter = composer.chain_stream_orderbooks_filter(market_ids=derivative_market_ids)
-            derivative_trades_filter = composer.chain_stream_trades_filter(market_ids=derivative_market_ids)
-            derivative_orders_filter = composer.chain_stream_orders_filter(
+            derivative_orderbooks_filter = composer.chain_stream_orderbooks_v2_filter(market_ids=derivative_market_ids)
+            derivative_trades_filter = composer.chain_stream_trades_v2_filter(market_ids=derivative_market_ids)
+            derivative_orders_filter = composer.chain_stream_orders_v2_filter(
                 subaccount_ids=subaccount_ids, market_ids=derivative_market_ids
             )
-            positions_filter = composer.chain_stream_positions_filter(
+            positions_filter = composer.chain_stream_positions_v2_filter(
                 subaccount_ids=subaccount_ids, market_ids=derivative_market_ids
             )
-            oracle_price_filter = composer.chain_stream_oracle_price_filter(symbols=list(oracle_price_symbols))
+            oracle_price_filter = composer.chain_stream_oracle_price_v2_filter(symbols=list(oracle_price_symbols))
         else:
             derivative_orderbooks_filter = None
             derivative_trades_filter = None

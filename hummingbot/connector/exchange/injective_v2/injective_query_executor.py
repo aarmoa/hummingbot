@@ -6,7 +6,7 @@ from pyinjective.async_client import AsyncClient
 from pyinjective.client.model.pagination import PaginationOption
 from pyinjective.core.market import DerivativeMarket, SpotMarket
 from pyinjective.core.token import Token
-from pyinjective.proto.injective.stream.v1beta1 import query_pb2 as chain_stream_query
+from pyinjective.proto.injective.stream.v2 import query_pb2 as chain_stream_query
 
 
 class BaseInjectiveQueryExecutor(ABC):
@@ -350,7 +350,7 @@ class PythonSDKInjectiveQueryExecutor(BaseInjectiveQueryExecutor):
         positions_filter: Optional[chain_stream_query.PositionsFilter] = None,
         oracle_price_filter: Optional[chain_stream_query.OraclePriceFilter] = None,
     ):  # pragma: no cover
-        await self._sdk_client.listen_chain_stream_updates(
+        await self._sdk_client.listen_chain_stream_v2_updates(
             callback=callback,
             on_end_callback=on_end_callback,
             on_status_callback=on_status_callback,

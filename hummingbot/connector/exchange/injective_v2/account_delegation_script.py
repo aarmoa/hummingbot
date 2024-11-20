@@ -37,7 +37,7 @@ async def main() -> None:
     account = await client.get_account(granter_address.to_acc_bech32())  # noqa: F841
     granter_subaccount_id = granter_address.get_subaccount_id(index=GRANTER_SUBACCOUNT_INDEX)
 
-    msg_spot_market = composer.MsgGrantTyped(
+    msg_spot_market = composer.create_typed_msg_grant(
         granter=granter_address.to_acc_bech32(),
         grantee=GRANTEE_PUBLIC_INJECTIVE_ADDRESS,
         msg_type="CreateSpotMarketOrderAuthz",
@@ -46,7 +46,7 @@ async def main() -> None:
         market_ids=SPOT_MARKET_IDS,
     )
 
-    msg_derivative_market = composer.MsgGrantTyped(
+    msg_derivative_market = composer.create_typed_msg_grant(
         granter=granter_address.to_acc_bech32(),
         grantee=GRANTEE_PUBLIC_INJECTIVE_ADDRESS,
         msg_type="CreateDerivativeMarketOrderAuthz",
@@ -55,7 +55,7 @@ async def main() -> None:
         market_ids=DERIVATIVE_MARKET_IDS,
     )
 
-    msg_batch_update = composer.MsgGrantTyped(
+    msg_batch_update = composer.create_typed_msg_grant(
         granter = granter_address.to_acc_bech32(),
         grantee = GRANTEE_PUBLIC_INJECTIVE_ADDRESS,
         msg_type = "BatchUpdateOrdersAuthz",
